@@ -13,6 +13,32 @@ outrank them in a `from:` range.)
 
 ---
 
+## [1.0.4-busog.4] — 2026-09-15
+
+### Changed
+- **Rebased onto upstream `2e745fd` (28 Jul 2026).** No fork patch changed; all
+  four replay cleanly. What came in underneath is upstream housekeeping —
+  latest Vapor, the Swift base image to 6.3.3-noble, and two GitHub Actions
+  bumps. Verified by a full `xcrun swift build` after the rebase, because the
+  Vapor bump is the one that could have broken `Parse+Vapor` or the two
+  `ParseHook*+Vapor` files.
+- Repo renamed **`busoglabs/parse-server-swift` → `busoglabs/lokality-parse-server-swift`**,
+  so it is obvious at a glance that this is our fork and not upstream. The old
+  name still redirects, but redirects only survive while nobody re-creates the
+  name — the `exact:` pins in lokalitycloud, busogcloud and packcloud were
+  updated rather than left to the redirect.
+
+### Note
+- ⚠️ The `ParseServerMemoryStore` patch (`feat: in-memory primitive store`) is
+  carried forward unexamined. `parse-server/CLAUDE.md` records `primitiveStore`
+  as one of four things that *sound* like the macOS keychain fix and are not —
+  `ParseKeychainAccessGroup` and `ParseVersion` read `KeychainStore.shared`
+  directly, ignoring any configured store. If that applies here too, this is 93
+  lines of rebase cost forever for no effect. Worth measuring before the next
+  sync.
+
+---
+
 ## [1.0.4-busog.3] — 2026-07-21
 
 ### Changed
