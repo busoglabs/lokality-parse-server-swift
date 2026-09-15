@@ -13,6 +13,34 @@ outrank them in a `from:` range.)
 
 ---
 
+## [1.0.4-busog.5] — 2026-09-15
+
+### Removed
+- **The `ParseServerMemoryStore` patch is gone — 93 lines, measured to do
+  nothing.** It swapped Parse-Swift's keychain-backed primitive store for an
+  in-memory one, claiming that stopped the macOS keychain dialog after a
+  rebuild. It does not, and the reason is structural rather than a bug:
+  · an in-memory store is EMPTY on every process start, so the lookup always
+    misses and falls straight through to `KeychainStore.shared.get(...)` on the
+    next line;
+  · `ParseKeychainAccessGroup.setCurrent` and `ParseVersion` write to
+    `ParseStorage.shared` and then to `KeychainStore.shared`
+    **unconditionally** — side by side, never an else;
+  · and `Parse.swift` calls `KeychainStore.shared.deleteAll()`/`.copy(...)`
+    directly, with no store indirection at all.
+  **Measured, not reasoned:** deleted all three `com.parseSwift.sdk` items, ran
+  the sample `App` to a healthy Parse Server, and watched all three reappear.
+- The real mitigation is unchanged and lives elsewhere:
+  `lokalitycloud/scripts/keychain-reset-parseswift.sh`, called by
+  `build-local.sh`, which deletes the items so the new binary creates and owns
+  them. Dropping this patch does not bring the dialogs back.
+
+### Note
+- Three fork patches now, not four. Every one of them is replayed onto upstream
+  forever, so a patch that does nothing is a permanent tax.
+
+---
+
 ## [1.0.4-busog.4] — 2026-09-15
 
 ### Changed
