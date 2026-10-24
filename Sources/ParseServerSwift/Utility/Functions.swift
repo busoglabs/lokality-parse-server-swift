@@ -34,12 +34,32 @@ public func setConfiguration(_ configuration: ParseServerConfiguration) throws {
  with an error that should be sent back to the Parse Server immediately.
  */
 public func checkHeaders<T>(_ req: Request) -> ParseHookResponse<T>? {
-    guard req.headers.first(name: Headers.webhook) == configuration.webhookKey else {
+    // Fails CLOSED. This used to be `header == configuration.webhookKey` on two
+    // Optionals, so a server started with no key accepted a request that sent
+    // no header (nil == nil) — every hook open to anyone who could reach it.
+    guard webhookKeyMatches(req.headers.first(name: Headers.webhook),
+                            configured: configuration.webhookKey) else {
         let error = ParseError(code: .otherCause,
                                message: "Webhook keys don't match")
         return ParseHookResponse<T>(error: error)
     }
     return nil
+}
+
+/**
+ True only when both keys are non-empty and equal. Compared in constant time
+ for equal lengths, so response timing does not reveal how much of a guess
+ was right.
+ */
+public func webhookKeyMatches(_ supplied: String?, configured: String?) -> Bool {
+    guard let supplied, let configured, !supplied.isEmpty, !configured.isEmpty else {
+        return false
+    }
+    let a = Array(supplied.utf8), b = Array(configured.utf8)
+    guard a.count == b.count else { return false }
+    var diff: UInt8 = 0
+    for i in 0..<a.count { diff |= a[i] ^ b[i] }
+    return diff == 0
 }
 
 /**

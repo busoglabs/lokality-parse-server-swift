@@ -75,6 +75,13 @@ public struct ParseServerConfiguration {
 
         serverPathname = try Self.resolveServerPathname(for: app)
         webhookKey = Environment.process.PARSE_SERVER_SWIFT_WEBHOOK_KEY
+        // Refuse to start without one: every webhook would answer "keys don't
+        // match" (checkHeaders fails closed), and before that check failed
+        // closed, an unset key let every request through.
+        guard let webhookKey, !webhookKey.isEmpty else {
+            throw ParseError(code: .otherCause,
+                             message: "PARSE_SERVER_SWIFT_WEBHOOK_KEY is missing or empty")
+        }
 
         let serverURLStrings = try getParseServerURLs()
         primaryParseServerURLString = serverURLStrings.0
