@@ -13,6 +13,19 @@ outrank them in a `from:` range.)
 
 ---
 
+## [1.0.4-busog.6] — 2026-10-25
+
+### Security
+- **`checkHeaders` fails closed.** It compared the request's webhook-key header
+  with the configured key as two Optionals, so a server started with no key
+  accepted any request that sent no header (nil == nil) — every hook open to
+  anyone who could reach it. Both must now be non-empty and equal, compared in
+  constant time (`webhookKeyMatches`).
+- **The environment initialiser refuses to start without
+  `PARSE_SERVER_SWIFT_WEBHOOK_KEY`** (missing or empty throws).
+
+---
+
 ## [1.0.4-busog.5] — 2026-09-15
 
 ### Removed
