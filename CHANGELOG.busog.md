@@ -13,6 +13,21 @@ outrank them in a `from:` range.)
 
 ---
 
+## [Unreleased] — not tagged; consumers still pin busog.6
+
+### Fixed
+- **A failed initialization at startup now THROWS** (Parse health check or
+  `ParseSwift.initialize`) (Lokality board t58,
+  3 Nov 2026). `initializeServer` (`Parse.swift`) deleted the hooks, shut the
+  app down and then returned normally, so `parseServerSwiftConfigure` went on
+  to register routes on the dead app and the consumer's next read of
+  `app.core` trapped: `Vapor/Core.swift:138: Fatal error: Core not
+  configured`. Hit on staging by both lokalitycloud and busogcloud when they
+  were recreated while Parse restarted. Consumers must exit on the error, not
+  rethrow it out of `main` (that is also a trap).
+
+---
+
 ## [1.0.4-busog.6] — 2026-10-25
 
 ### Security

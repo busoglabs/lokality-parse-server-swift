@@ -86,6 +86,10 @@ func initializeServer(
         } catch {
             await deleteHooks(app)
             try await app.asyncShutdown()
+            // busog fork: rethrow. Returning here let the caller register
+            // routes and start a shut-down app, whose first read of
+            // `app.core` trapped with "Core not configured".
+            throw error
         }
     } else {
         Parse.configuration = configuration
