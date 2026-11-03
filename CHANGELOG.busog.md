@@ -13,7 +13,7 @@ outrank them in a `from:` range.)
 
 ---
 
-## [Unreleased] — not tagged; consumers still pin busog.6
+## [1.0.4-busog.7] — 2026-11-03
 
 ### Fixed
 - **A failed initialization at startup now THROWS** (Parse health check or
